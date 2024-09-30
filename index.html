@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
+        <script src="https://cdn.babylonjs.com/recast.js"></script>
+        <script src="https://cdn.babylonjs.com/ammo.js"></script>
+        <script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>
+        <script src="https://cdn.babylonjs.com/cannon.js"></script>
+        <script src="https://cdn.babylonjs.com/Oimo.js"></script>
+        <script src="https://cdn.babylonjs.com/earcut.min.js"></script>
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://cdn.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://cdn.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+            
+            #canvasZone {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+<body>
+    <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var startRenderLoop = function (engine, canvas) {
+            engine.runRenderLoop(function () {
+                if (sceneToRender && sceneToRender.activeCamera) {
+                    sceneToRender.render();
+                }
+            });
+        }
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
+        var createScene = function () {
+    // This creates a basic Babylon Scene object (non-mesh)
+    var scene = new BABYLON.Scene(engine);
+
+    var camera = new BABYLON.ArcRotateCamera("camera", BABYLON.Tools.ToRadians(90), BABYLON.Tools.ToRadians(65), 10, BABYLON.Vector3.Zero(), scene);
+
+    // This attaches the camera to the canvas
+    camera.attachControl(canvas, true);
+
+    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+    // Default intensity is 1. Let's dim the light a small amount
+    light.intensity = 0.7;
+
+    const mat1 = new BABYLON.StandardMaterial("mat1");
+    mat1.diffuseTexture = new BABYLON.Texture("https://jgalvis01.github.io/webGL/august-steiro-grass-basecolor.jpg", scene);
+    mat1.bumpTexture = new BABYLON.Texture("https://jgalvis01.github.io/webGL/4739-normal.jpg");
+
+    const mat2 = new BABYLON.StandardMaterial("mat2");
+    mat2.diffuseTexture = new BABYLON.Texture("https://jgalvis01.github.io/webGL/63b8466b1a1d5454eca87ea871daefa5.jpg", scene);
+    mat2.bumpTexture = new BABYLON.Texture("https://jgalvis01.github.io/webGL/abb024476a83a7e5102487f71f26a870.jpg");
+
+    const mat3 = new BABYLON.StandardMaterial("mat3");
+    mat3.diffuseTexture = new BABYLON.Texture("https://jgalvis01.github.io/webGL/11411-diffuse.jpg", scene);
+    mat3.bumpTexture = new BABYLON.Texture("https://jgalvis01.github.io/webGL/7851-normal.jpg");
+
+    BABYLON.SceneLoader.ImportMeshAsync("", "https://jgalvis01.github.io/webGL/", "montana.glb", scene).then((result) => {
+        result.meshes.forEach((mesh) => {
+            mesh.material = mat1;
+        });
+    });
+
+
+    BABYLON.SceneLoader.ImportMeshAsync("", "https://jgalvis01.github.io/webGL/", "auenland_blendswap.glb").then((result) => {
+        result.meshes[1].position.x = 0;
+        result.meshes[1].position.y = -0.5;
+        result.meshes[1].position.z = -8;
+        result.meshes[1].material = mat2;
+    	result.meshes.forEach((mesh) => {
+            mesh.material = mat2;
+        });
+        
+    });
+
+    BABYLON.SceneLoader.ImportMeshAsync("", "https://jgalvis01.github.io/webGL/", "estatua.glb").then((result) => {
+        result.meshes[1].position.x = 10;
+        result.meshes[1].position.y = -40;
+        result.meshes[1].position.z = 140;
+        result.meshes[1].scaling = new BABYLON.Vector3(1, 1, 1);
+        result.meshes[1].rotate(BABYLON.Axis.Y, Math.PI, BABYLON.Space.WORLD);
+        
+    });
+
+    BABYLON.SceneLoader.ImportMeshAsync("", "https://jgalvis01.github.io/webGL/", "puente.glb").then((result) => {
+        result.meshes[1].position.x = -2;
+        result.meshes[1].position.y = 0;
+        result.meshes[1].position.z = 25; 
+        result.meshes[1].scaling = new BABYLON.Vector3(1, 1, 1);
+        result.meshes[1].rotate(BABYLON.Axis.Y, Math.PI, BABYLON.Space.WORLD);
+        result.meshes.forEach((mesh) => {
+            mesh.material = mat3;
+        });
+        
+    });
+
+    BABYLON.SceneLoader.ImportMeshAsync("", "https://jgalvis01.github.io/webGL/", "tuberia.glb").then((result) => {
+        result.meshes[1].position.x = -11;
+        result.meshes[1].position.y = 0;
+        result.meshes[1].position.z = 12; 
+        result.meshes[1].scaling = new BABYLON.Vector3(1, 1, 1);
+        result.meshes[1].rotate(BABYLON.Axis.Y, Math.PI, BABYLON.Space.WORLD);
+
+        
+    });
+
+    BABYLON.SceneLoader.ImportMeshAsync("", "https://jgalvis01.github.io/webGL/", "barril.glb").then((result) => {
+        result.meshes[1].position.x = 7;
+        result.meshes[1].position.y = 0.6;
+        result.meshes[1].position.z = 12; 
+        result.meshes[1].scaling = new BABYLON.Vector3(1, 1, 1);
+        result.meshes[1].rotate(BABYLON.Axis.Y, Math.PI, BABYLON.Space.WORLD);
+
+        
+    });
+
+    BABYLON.SceneLoader.ImportMeshAsync("", "https://jgalvis01.github.io/webGL/", "duende.glb").then((result) => {
+        const duende = result.meshes[1];
+        
+        // Ajustar la posición deseada
+        duende.position.set(1, 2, 4);
+
+        // Ajustar la escala para hacerlo más pequeño
+        duende.scaling = new BABYLON.Vector3(0.02, 0.02, 0.02); // Escala más pequeña
+
+        // Rotar 270 grados en el eje Y (equivale a 3 * Math.PI / 2 radianes)
+        duende.rotate(BABYLON.Axis.Y, 3 * Math.PI / 2, BABYLON.Space.WORLD);
+    });
+
+
+    return scene;
+};
+                window.initFunction = async function() {
+                    
+                    
+                    
+                    var asyncEngineCreation = async function() {
+                        try {
+                        return createDefaultEngine();
+                        } catch(e) {
+                        console.log("the available createEngine function failed. Creating the default engine instead");
+                        return createDefaultEngine();
+                        }
+                    }
+
+                    window.engine = await asyncEngineCreation();
+        if (!engine) throw 'engine should not be null.';
+        startRenderLoop(engine, canvas);
+        window.scene = createScene();};
+        initFunction().then(() => {sceneToRender = scene                    
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
